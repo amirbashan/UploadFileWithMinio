@@ -1,5 +1,5 @@
 
-# Upload File By Minio(Docker Image)#
+# Upload File By Minio(Docker Image)
 
 ## Setup ##
 * Clone project
