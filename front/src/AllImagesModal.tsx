@@ -47,14 +47,24 @@ const AllImagesModal = ({
                   marginBottom: "2vh",
                   margin: "2vh",
                 }}
+                key={index}
               >
-                <img
-                  key={index}
-                  src={imageUrl}
-                  onClick={(e) => handleToChooseImageFromAllImages(e)}
-                  style={{ width: "10rem", height: "10rem" }}
-                  alt={"NAN"}
-                />
+                {imageUrl.includes("<svg") ? (
+                  <div
+                    style={{ width: "10rem", height: "10rem" }}
+                    key={index}
+                    onClick={(e) => handleToChooseImageFromAllImages(e)}
+                    dangerouslySetInnerHTML={{ __html: imageUrl }}
+                  ></div>
+                ) : (
+                  <img
+                    key={index}
+                    src={imageUrl}
+                    onClick={(e) => handleToChooseImageFromAllImages(e)}
+                    style={{ width: "10rem", height: "10rem" }}
+                    alt={"NAN"}
+                  />
+                )}
               </div>
             ))
           ) : (

@@ -4,7 +4,9 @@
   "description": "",
   "scripts": {
     "init": "npm i && cd server && npm i && cd .. && cd front && npm i",
-    "dev:front": "cd front && npm run dev"
+    "dev:front": "cd front && npm run dev",
+    "dev:server": "cd server && npm run dev"
+
   },
   "keywords": [],
   "author": "Netanel ",

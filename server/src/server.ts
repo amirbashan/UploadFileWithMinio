@@ -2,7 +2,9 @@ import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import { BucketItem, BucketStream, Client } from "minio";
 import multer from "multer";
-import streamifier from "streamifier";
+import { isSvgImage } from "./utils";
+import axios from "axios";
+import "dotenv/config";
 
 const app: Express = express();
 
@@ -17,11 +19,11 @@ const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const minioClient = new Client({
-  endPoint: "localhost",
-  port: 9000,
+  endPoint: process.env.END_POINT || "",
+  port: Number(process.env.PORT),
   useSSL: false,
-  accessKey: "5v1zaPHtCTDVHLEhzNqP",
-  secretKey: "Qgjwa5nqyiO1sPLlbHCu6scjjXtv4YEeyCjlUXQh",
+  accessKey: process.env.ACCESS_KEY || "",
+  secretKey: process.env.SECRET_KEY || "",
 });
 
 app.post("/uploadImage", upload.single("image"), async (req, res: any) => {
@@ -48,11 +50,20 @@ app.post("/uploadImage", upload.single("image"), async (req, res: any) => {
 app.get("/getImageByName", async (req, res) => {
   try {
     const nameOfFile = req.query.name;
-    const imageUrl = minioClient.presignedGetObject(
+    const imageUrlPromise = minioClient.presignedGetObject(
       "demo",
       nameOfFile as string,
     );
-    res.status(200).send(await imageUrl);
+    const imageUrl = await imageUrlPromise;
+    if (isSvgImage(imageUrl)) {
+      console.log("Is svg file");
+      const response = await axios.get(imageUrl);
+      if (response.status === 200) {
+        const svgData = await response.data;
+        return res.status(200).send(svgData);
+      }
+    }
+    res.status(200).send(imageUrl);
   } catch (e) {
     throw new Error(`Cant getImageByName ${e}`);
   }
@@ -67,12 +78,22 @@ app.get("/getImages", async (req: Request, res: Response) => {
       objectNames.push(object.name);
     }
 
-    const imageUrls = await Promise.all(
+    let imageUrls = await Promise.all(
       objectNames.map(async (objectName) => {
         return await minioClient.presignedGetObject("demo", objectName);
       }),
     );
-    res.status(200).send(imageUrls);
+    const ImagesWithSvgFileFormat = imageUrls.map(async (url) => {
+      if (url.includes(".svg")) {
+        const response = await axios.get(url);
+        if (response.status === 200) {
+          const svgData: string = await response.data;
+          return svgData;
+        }
+      }
+      return url;
+    });
+    res.status(200).send(await Promise.all(ImagesWithSvgFileFormat));
   } catch (error) {
     console.error("Error getting image URLs:", error);
     res.status(500).send("Internal Server Error");

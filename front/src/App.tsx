@@ -19,11 +19,10 @@ function App() {
   useEffect(() => {
     const fetchImages = async () => {
       const { data } = await axios.get("http://localhost:3002/getImages");
-      console.log(data);
       setImagesUrl(data);
     };
     fetchImages();
-  }, [setUploadedFile]);
+  }, [setUploadedFile, isClickShowMore]);
   const handleOnChane = async (e: ChangeEvent<HTMLInputElement>) => {
     try {
       if (e?.target?.files) {
@@ -51,9 +50,15 @@ function App() {
   console.log("uploadedFile", uploadedFile);
 
   const handleToChooseImageFromAllImages = (e: any) => {
-    setUploadedFile(e.target.src);
+    console.log(e.target.outerHTML);
+    if (e.target.outerHTML.includes("<path")) {
+      setUploadedFile(e.target.outerHTML);
+    } else {
+      setUploadedFile(e.target.src);
+    }
     setIsClickShowMore(false);
   };
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Button variant="contained" component="label">
@@ -116,11 +121,18 @@ function App() {
           }}
         >
           <h3>Selected Image</h3>
-          <img
-            src={uploadedFile}
-            style={{ width: "18vw", height: "22vh" }}
-            alt={"UploadFile"}
-          />
+          {uploadedFile.includes("<svg") || uploadedFile.includes("<path") ? (
+            <div
+              style={{ width: "12vw", height: "10vh", display: "contents" }}
+              dangerouslySetInnerHTML={{ __html: uploadedFile }}
+            ></div>
+          ) : (
+            <img
+              src={uploadedFile}
+              style={{ width: "12vw", height: "22vh" }}
+              alt={"upload-file"}
+            />
+          )}
         </div>
       )}
     </div>
