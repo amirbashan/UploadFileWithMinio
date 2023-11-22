@@ -51,7 +51,13 @@ const AllImagesModal = ({
               >
                 {imageUrl.includes("<svg") ? (
                   <div
-                    style={{ width: "10rem", height: "10rem" }}
+                    style={{
+                      width: "10rem",
+                      height: "10rem",
+                      justifyContent: "center",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
                     key={index}
                     onClick={(e) => handleToChooseImageFromAllImages(e)}
                     dangerouslySetInnerHTML={{ __html: imageUrl }}

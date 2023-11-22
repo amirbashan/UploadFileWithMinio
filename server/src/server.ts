@@ -73,6 +73,10 @@ app.get("/getImageByName", async (req, res) => {
 
 app.get("/getImages", async (req: Request, res: Response) => {
   try {
+    if (!(await minioClient.bucketExists(bucketName))) {
+      console.log(`Bucket ${bucketName} created`);
+      await minioClient.makeBucket(bucketName);
+    }
     const objects: BucketStream<BucketItem> =
       minioClient.listObjects(bucketName);
     const objectNames: string[] = [];
