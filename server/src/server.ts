@@ -26,13 +26,15 @@ const minioClient = new Client({
   secretKey: process.env.SECRET_KEY || "",
 });
 
+const bucketName = process.env.BUCKET_NAME || "demo";
+
 app.post("/uploadImage", upload.single("image"), async (req, res: any) => {
   try {
     const file = req.file as any;
     console.log(req.file);
 
     const responseFromMinio = await minioClient.putObject(
-      "demo",
+      bucketName,
       file.originalname,
       file.buffer,
       {
@@ -51,7 +53,7 @@ app.get("/getImageByName", async (req, res) => {
   try {
     const nameOfFile = req.query.name;
     const imageUrlPromise = minioClient.presignedGetObject(
-      "demo",
+      bucketName,
       nameOfFile as string,
     );
     const imageUrl = await imageUrlPromise;
@@ -71,7 +73,8 @@ app.get("/getImageByName", async (req, res) => {
 
 app.get("/getImages", async (req: Request, res: Response) => {
   try {
-    const objects: BucketStream<BucketItem> = minioClient.listObjects("demo");
+    const objects: BucketStream<BucketItem> =
+      minioClient.listObjects(bucketName);
     const objectNames: string[] = [];
 
     for await (const object of objects) {
@@ -80,7 +83,7 @@ app.get("/getImages", async (req: Request, res: Response) => {
 
     let imageUrls = await Promise.all(
       objectNames.map(async (objectName) => {
-        return await minioClient.presignedGetObject("demo", objectName);
+        return await minioClient.presignedGetObject(bucketName, objectName);
       }),
     );
     const ImagesWithSvgFileFormat = imageUrls.map(async (url) => {
