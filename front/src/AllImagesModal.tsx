@@ -31,7 +31,7 @@ const AllImagesModal = ({
       <Box sx={style}>
         <div
           style={{
-            width: "25rem",
+            width: "27rem",
             display: "flex",
             flexDirection: "row",
             boxSizing: "border-box",
